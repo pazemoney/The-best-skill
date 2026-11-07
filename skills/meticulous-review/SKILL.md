@@ -1,0 +1,287 @@
+---
+name: meticulous-review
+description: Work through a Meticulous test run's results, reacting to their review state — review the unreviewed diffs (and any failing non-visual checks) against what the PR is meant to change, flagging potential regressions; when you're working on the PR's code, hand what needs fixing (diffs someone rejected or commented on, and your own rejections) to the `meticulous-fix` skill; also summarizes any Agent swarm results. Resolves the test run from the local repo's current commit (the default), or from an explicit test-run ID, commit SHA or PR number. Use whenever a run's results matter — reviewing a pull/merge request, right after pushing a frontend change yourself, when its Meticulous CI check is failing or pending, or when asked to look at Meticulous results.
+user-invocable: true
+---
+
+To work through a Meticulous test run, follow the workflow below step by step, using the CLI or MCP commands as described. You don't need to know up front whether the run still needs reviewing or someone has already reviewed it: Step 1 reads its review state, and that decides what follows.
+
+> Before starting, run the `meticulous-cli-update` skill to ensure the Meticulous CLI and skills are up to date — unless it has already run earlier in this conversation, in which case skip it.
+
+While reviewing, treat yourself as a **reviewer, not the implementer** — even if you did write the change earlier in this conversation. Classify each diff on its merits; fixing is a separate pass afterwards (Step 12), not something to interleave with the review. If you're mid-implementation and want to loop against Meticulous until things look right, see the `meticulous-iterative-dev` skill for feature work with intended visual changes, or the `meticulous-zero-diff-task` skill when the UI must not change.
+
+## Step 0 -- Establish what's expected
+
+Before looking at any diff, work out what visual change this PR is _supposed_ to produce:
+
+- **If you already have full context** (same conversation that implemented the change, or the user just described the task), use that.
+- **Otherwise** — fetch the PR description (e.g. `gh pr view <number> --json title,body` for GitHub, `glab mr view <id> --output json --jq '{title,description}'` for GitLab, or for Bitbucket `twg bitbucket pull-requests get <id>` if the [Teamwork Graph CLI](https://developer.atlassian.com/cloud/twg-cli/) is available — follow its `twg-engineering-work` skill if that's installed, and run `twg setup bitbucket` once if it asks for a Bitbucket token — else `GET /2.0/repositories/{workspace}/{repo_slug}/pullrequests/{id}?fields=title,description`) and pull out a brief bullet-point summary of any visual changes it calls out as expected.
+- If it doesn't mention any, note that explicitly — every diff below then gets extra scrutiny, since there's nothing on record it could be a known, accepted consequence of.
+
+## Step 1 -- Get the replay diff summary, with its review state
+
+Run from the local checkout to resolve the test run from the current commit's git HEAD — make sure HEAD matches the remote head CI ran on first (e.g. `git pull`), or you may review a stale or missing run:
+
+```bash
+# CLI (infers the run from local git HEAD)
+meticulous agent test-run-diffs --includeReviews
+
+# MCP (git context is never inferred — resolve the testRunId from a commit first)
+get_test_run_for_commit(commitSha="<sha>")
+get_test_run_diffs(testRunId="<id>", includeReviews=true)
+```
+
+Returns a TSV of `replayDiffId`/`screenshotName` rows — a representative, priority-ordered subset of real visual differences; work through them top to bottom. `--includeReviews` adds each row's `decision` and `openComments`. To target a run explicitly instead of resolving from HEAD, pass `--testRunId <id>`, `--commitSha <sha>` or `--prNumber <n>` (on MCP, `get_test_run_diffs(prNumber=<n>)` skips the `get_test_run_for_commit` step). The CLI blocks until the run finishes by default (pass `--dontWaitForTestRunToComplete` to instead report an in-progress run and exit immediately); MCP never blocks, so keep polling until `status` is `complete`/`failed`.
+
+The review state decides what each row needs:
+
+- **`unreviewed`, no open comments** — review it: Steps 2–6.
+- **`rejected`, or open comments** — someone has already looked at it, so don't re-review it; Step 7 picks it up.
+- **`accepted` or `ignored`**, no open comments — already decided; nothing to do.
+
+If no row needs reviewing, go straight to Step 7. Otherwise every unreviewed row must be matched against Step 0 or flagged (see the Decision guide) before concluding the PR is good.
+
+## Step 2 -- Get screenshot images
+
+For each representative screenshot:
+
+```bash
+# CLI (downloads images to ~/.meticulous/agent-images/ and prints local paths)
+meticulous agent image-files --replayDiffId <replayDiffId> --screenshotName <screenshotName>
+
+# MCP (no download-to-disk tool — returns signed URLs instead; fetch them to view the images)
+get_image_urls(replayDiffId="<replayDiffId>", screenshotName="<screenshotName>")
+```
+
+Open (or fetch) `before`, `after`, and `diffImage` to inspect the change — `diffImage` is usually the most informative, highlighting exactly which pixels changed. Always inspect the images, even when the DOM diff looks clear.
+
+## Step 3 -- Inspect the DOM diff (for structural detail)
+
+```bash
+# CLI
+meticulous agent dom-diff --replayDiffId <replayDiffId> --screenshotName <screenshotName>
+
+# MCP
+get_dom_diff(replayDiffId="<replayDiffId>", screenshotName="<screenshotName>")
+```
+
+Optional: `--context <N|full>` (CLI) controls how many context lines surround each hunk (default 3).
+
+Output is a unified diff (`+`/`-`) of both sides with noise (generated ids, Meticulous's own annotations) removed, one block per change, headed by `diff N at path [...]` naming the element that changed — for example (illustrative, not real output):
+
+```
+diff 0 at path [1,0,2]
+ <div class="item">
+-  <span class="label">old label</span>
++  <span class="label" data-flag="true">new label</span>
+ </div>
+diff 1 at head path [1,3]
+ <ul class="list">
++  <li>new item</li>
+ </ul>
+```
+
+It's paged by line (`--limit`/`--offset`, 100 lines by default); pass a hunk's path as `--path` to diff only that element. To read the DOM itself, as one replay captured it, use `agent dom --replayId <replayId> --screenshotName <screenshotName> [--path <path>]` (MCP: `get_dom`), with the replay IDs from `test-run-diffs --includeReplayIds`.
+
+## Step 4 -- Get the replay timeline (optional, for diagnosing unexpected diffs)
+
+If a diff is unexpected and the images/DOM don't make it obvious why:
+
+```bash
+# CLI
+meticulous agent timeline-diff --replayDiffId <replayDiffId>
+
+# MCP
+get_timeline_diff(replayDiffId="<replayDiffId>")
+```
+
+By default it lists only the events that differ, plus the screenshots and user events around them. TSV columns: `diff` (` ` identical, `-` removed, `+` added, `!` changed), `eventId`, `timeMs`, `kind` (`user`/`screenshot`/`network`/`console`/etc.), `description`, `count`, `changes` (for `!` rows, what changed). Look for failed network requests, unexpected redirects, mismatched user events, or timing anomalies that could explain a visual change.
+
+To dig into one row, pass its `eventId` to `agent timeline-event-diff --replayDiffId <replayDiffId> --eventId <eventId>` (MCP: `get_timeline_event_diff`), which lists that event's fields that differ between base and head. To inspect either side's full timeline on its own, use `agent timeline --replayId <replayId>` and `agent timeline-event --replayId <replayId> --eventId <eventId>` (MCP: `get_timeline`, `get_timeline_event`), with the replay IDs from `test-run-diffs --includeReplayIds`.
+
+## Step 5 -- Decision guide
+
+For each representative screenshot, compare the diff image and DOM diff against Step 0's expectations:
+
+- **Expected** — matches one of Step 0's expected changes (or, with full implementation context, is clearly a desired outcome). Check the diff actually looks like _that_ change and nothing more — a diff can be expected in kind but still carry an extra, unrelated regression bundled into the same screenshot. Nothing to flag; **approve** it if `approve-diff` is available (Step 6).
+- **Unintended** — not accounted for by Step 0. Use the timeline to rule out failed requests, redirects, or other anomalies, then flag it:
+  - **Potential regression** (a real side effect, or otherwise clearly wrong) → **reject**.
+  - **Unrelated to the change under review** (see below) → **ignore**.
+
+Either way it's flagged, not silently dropped — a human still needs to see it.
+
+**What counts as unrelated.** Ignore only a diff the change has no plausible way to cause:
+
+- rendering noise: subpixel or anti-aliasing differences, usually with no DOM change;
+- an animation, spinner, carousel or video caught at a different frame;
+- fonts or images loading late, or network responses arriving in a different order;
+- environment noise: a server-rendered timestamp or data, a build version or SHA, third-party content.
+
+Before ignoring, check that the change cannot reach the affected area (nothing in the PR diff leads to that screen or component) and that the timeline shows no divergence it explains. A replay that took a different path — a click landing elsewhere, a menu open on one side only — is unrelated only if the change cannot have caused it; the engine's own flake labels don't settle that. Never ignore:
+
+- a diff you cannot explain;
+- a diff the change could have caused, even a harmless one — approve it if it's intended, otherwise leave it undecided with a comment;
+- a recorded network response the new code no longer fits (e.g. a "Missing field" error) — the change caused it;
+- a regression bundled into a screenshot that is otherwise unrelated — reject it.
+
+When unsure, leave the diff undecided and explain with `create-diff-comment`.
+
+**Report likely engine bugs.** Add `--reportFlake` when ignoring a diff where the replay was nondeterministic although Meticulous should have made it deterministic — rendering, animations, timers, dates, randomness, network ordering, or a replay that took a different path. Meticulous then investigates it as a likely replay-engine bug. Report each flake once per run, not on every diff it shows up in: when one cause produces the same flake across many diffs (e.g. a clock or an animation that differs on every screen), ignore each of those diffs but add `--reportFlake` to only one of them. Leave it off for a genuine difference in what the app served (a server-rendered timestamp, a build version, third-party content): the app's owner fixes those, e.g. by hiding the element with the `meticulous-ignore` class.
+
+**Review first, fix afterwards.** Don't make code changes while reviewing: finish classifying and flagging every diff, then deal with what needs fixing in Step 12.
+
+## Step 6 -- Flag or approve the diff
+
+```bash
+# CLI
+meticulous agent reject-diff --replayDiffId=<id> --screenshotName=<name> --reason="<why>" --x=<0..1> --y=<0..1>
+meticulous agent approve-diff --replayDiffId=<id> --screenshotName=<name>
+meticulous agent ignore-diff --replayDiffId=<id> --screenshotName=<name> --reason="<why>" --x=<0..1> --y=<0..1> [--reportFlake]
+meticulous agent create-diff-comment --replayDiffId=<id> --screenshotName=<name> --text="<note>" --x=<0..1> --y=<0..1>
+
+# MCP
+reject_diff(replayDiffId="<id>", screenshotName="<name>", reason="<why>", x=<0..1>, y=<0..1>)
+approve_diff(replayDiffId="<id>", screenshotName="<name>")
+ignore_diff(replayDiffId="<id>", screenshotName="<name>", reason="<why>", x=<0..1>, y=<0..1>, reportFlake=<true|false>)
+create_diff_comment(replayDiffId="<id>", screenshotName="<name>", text="<note>", x=<0..1>, y=<0..1>)
+```
+
+Call `reject-diff` or `ignore-diff` for **every** diff classified as unintended, in addition to including it in the final report. `--reason` is the succinct explanation from your classification above; `--x`/`--y` are the approximate normalized coordinates of the changed region, estimated from the diff image. `create-diff-comment` is the neutral option for anything you want on the record without a verdict.
+
+**Is `approve-diff` available?** Only on projects with the **Enable approve/ignore diff actions** setting. Over MCP, `approve_diff` is only offered when it's on; the CLI can't tell up front, so call it on the first expected diff — a 403 starting "Agents may not approve diffs on project …" means it's off, so skip everything about approving from here on.
+
+Call `approve-diff` for every diff classified as expected. Unlike reject and ignore, it needs no reason.
+
+**Not symmetric:** `reject-diff` writes a real, blocking decision, same as a human rejection. Where `approve-diff` is available, `approve-diff` and `ignore-diff` also write real decisions that clear the diff. Otherwise `ignore-diff` decides nothing — it's a comment only, so the diff stays `unreviewed` and the check stays pending — so don't oversell it in your final report as having resolved anything.
+
+## Step 7 -- Go through the rest of the run
+
+Steps 1–6 covered only the representative subset. Do this step even when Step 1 found nothing in it to review.
+
+**Collect the fix targets.** List every diff in the run that's rejected or has an open comment:
+
+```bash
+# CLI
+meticulous agent test-run-diffs --onlyRejected --onlyWithComments --includeReviews
+
+# MCP
+get_test_run_diffs(testRunId="<id>", onlyRejected=true, onlyWithComments=true, includeReviews=true)
+```
+
+The `--only*` flags are additive (a diff that's rejected, has an open comment, or both) and are never capped to the representative subset. A rejection, or a comment asking for a change (`diff-comments` / `get_diff_comments` shows the thread), makes a diff a **fix target** for Step 12 — including the diffs you rejected yourself. A comment that only explains an ignore or an approval (as this skill's own `ignore-diff` and `approve-diff` leave — an ignore stays `unreviewed` on projects without agent ignores), or a note you left on a diff you were unsure about, is not.
+
+**Decide the remaining diffs (only where `approve-diff` is available).** The check passes only once every diff has a decision. Skip this part if Step 6 found `approve-diff` unavailable: without it, nothing here can clear the check. Otherwise, list what's still undecided:
+
+```bash
+# CLI
+meticulous agent test-run-diffs --includeAllDiffs --onlyUnreviewed --includeReviews
+
+# MCP
+get_test_run_diffs(testRunId="<id>", includeAllDiffs=true, onlyUnreviewed=true, includeReviews=true)
+```
+
+Take each row without open comments through Steps 2–6 like the first ones; a row with open comments is covered above. If you haven't called `approve-diff` yet, you find out whether it's available on the first row you classify as expected, as in Step 6 — if it isn't, stop there. Keep `--includeAllDiffs`: without it, `--onlyUnreviewed` stays capped to the representative subset for as long as any diff in it is still undecided.
+
+## Step 8 -- Review non-visual checks (only if the run has any)
+
+Besides screenshot diffs, a run can carry non-visual checks: builtin ones such as `accessibility`, `network-requests` and `react-component-renders`, and custom ones the project's own CI reports. Most projects have none, so first find out whether this run does:
+
+```bash
+# CLI (same run selector as Step 1)
+meticulous agent test-run-check --availableIds
+
+# MCP
+get_test_run_check_available_ids(testRunId="<id>")
+```
+
+If this is refused because the project isn't set up for checks, there are no checks to review: skip to Step 9. An empty list can also mean results haven't been reported yet, so retry as the command's notice says before concluding there are none.
+
+For each listed check, fetch its report:
+
+```bash
+# CLI
+meticulous agent test-run-check --checkId=<checkId> [--checkType=custom]
+
+# MCP
+get_test_run_check(testRunId="<id>", checkId="<checkId>", checkType="builtin|custom")
+```
+
+Only a **failing** check needs attention: one whose findings require acknowledgement. A passing check, or one that only warns, needs nothing. The report describes the findings. For builtin checks, `meticulous agent test-runs --prNumber=<n> --includeCheckIssueCounts` also counts the failures (`checkFailureCount`) per run. `ignore-check` refuses a check that doesn't require acknowledgement, so a refusal also settles it.
+
+Checks work differently from diffs: the only decision is to **dismiss** one, and a failing check nobody dismisses counts as a regression Meticulous caught and keeps the checks status failing. Classify each failing check the way Step 5 classifies a diff, against Step 0's expectations, and act on it:
+
+- **Expected**: an intended consequence of the change, such as a request the PR deliberately adds. Leave it for a person to dismiss, and say so in your final report.
+- **Potential regression**: leave it undismissed. That already records it as a regression, so there's nothing to call. Flag it in your final report with what the check found and your best assessment of the cause.
+- **Unrelated to the change under review** → **ignore**, under the same rule as diffs: only a finding the change has no plausible way to cause, such as one in code or pages the PR doesn't touch. Never ignore a finding you cannot explain, and never one that is expected or a regression: ignoring is the same as a person's Dismiss, and takes the finding out of the regressions Meticulous reports.
+
+```bash
+# CLI (--prNumber=<n> can stand in for --testRunId)
+meticulous agent ignore-check --testRunId=<id> --checkId=<checkId> [--checkType=custom] --reason="<why>"
+
+# MCP
+ignore_check(testRunId="<id>", checkId="<checkId>", checkType="builtin|custom", reason="<why>")
+```
+
+This works like `ignore-diff` in Step 6, with these differences:
+
+- **People don't see the reason.** It is stored with the decision as its justification, and agents can read it back with `check-comments`, but the Meticulous app doesn't show it. Repeat it in your final report, which is where a person will read it.
+- **`ignore-check` needs the "Let agents ignore checks" project setting**, separate from the diff one. Without it, it is refused: unlike `ignore-diff`, there is no comment-only fallback. Over MCP it's only offered when it's on. If it's refused, leave the check undismissed and name it in your final report as needing a human decision.
+- There's no comment on a check without ignoring it. When unsure, leave it undismissed and explain why in your final report.
+
+## Step 9 -- Summarize Agent swarm results (only if the commit has any)
+
+Some projects also run Agent swarm, Meticulous's hosted agent that tests a pull request's build in a browser and reports a handful of test cases, each `pass`, `fail`, `blocked` or `skipped`. There's nothing to approve, reject or ignore: its results are informational, except for cases with a fix prompt. Look for a run on the same commit:
+
+```bash
+# CLI (same run selector as Step 1; waits up to 10 minutes for a run still in progress)
+meticulous agent agent-swarm-run
+
+# MCP (a run still in progress returns { status: 'processing' }: poll every 10s, for at most 10 minutes)
+get_agent_swarm_run(commitSha="<sha>")
+```
+
+If it reports no Agent swarm run for the commit, or only a plan-only one, skip to Step 10. If the run is still in progress after 10 minutes, didn't complete (its `errorMessage` says why), or was found not testable (`notTestable`), just note that for the final report.
+
+Otherwise read through all of its cases (`title`, `status`, `outcomeSummary`), to get an idea of what was tested and what wasn't. The cases that matter are the ones with a **fix prompt**: a failure upheld by an independent checker, with a ready-made prompt for fixing it. Only a `fail` case can have one, so fetch each of those and check whether its output has a `fixPrompt`:
+
+```bash
+# CLI
+meticulous agent agent-swarm-run-case --swarmRunId=<id> --caseIndex=<n> --json
+
+# MCP
+get_agent_swarm_run_case(swarmRunId="<id>", caseIndex=<n>)
+```
+
+Whether a case has one matters more than what it says: report it — it's a fix target for Step 12.
+
+## Step 10 -- Final report
+
+Cover **all significant visual changes**, plus any failing checks from Step 8 and an Agent swarm summary from Step 9.
+
+1. **Expected changes** — brief, a line or two each: what changed, which Step 0 expectation it matches, and whether you approved it.
+2. **Flagged diffs** (if any) — the main point of the review, so give these the most detail: `replayDiffId`/`screenshotName` (linked: `https://app.meticulous.ai/test-runs/<testRunId>/replay-diff/<replayDiffId>?screenshot=<screenshotName>`), whether you rejected or ignored it, the reason you gave when flagging it (Step 6), what the change looks like, and your best assessment of the cause.
+3. **Failing checks** (if any) — for each one, the check ID and type, what it found, whether you ignored it, flagged it as a potential regression, or left it for a person as expected or unsure, and your reasoning in full, since the app doesn't show it.
+4. **Agent swarm** (if the commit has a run) — a line or two, linked to `https://app.meticulous.ai/test-runs/<testRunId>?tab=agent-swarm`: the outcomes (e.g. "4 cases: 3 passed, 1 blocked") and roughly what they covered, or why the run didn't complete or wasn't testable. Name each failed case and its `outcomeSummary`, and point out the ones with a fix prompt, which the `meticulous-fix` skill can work from.
+5. **Already reviewed** (if Step 7 found any) — diffs someone else had rejected or commented on, with what each comment asks for, and whether you'll fix them next (Step 12) or are leaving them for the PR's author.
+
+The PR is only good when every diff and failing check has been matched or flagged. If any is flagged, the PR is not yet good: surface it clearly to the user in addition to the flag itself. Where `approve-diff` is available, also name any diff you left undecided: it keeps the check pending. Likewise name any failing check you left undismissed: it keeps the checks status failing until a person dismisses it or the code is fixed.
+
+## Step 11 -- Report feedback to Meticulous
+
+**Always do this to close the review — it's part of the review itself, not something the user has to ask for.** Submit one brief note: did Meticulous catch a real problem, was anything confusing, what would have made the review easier. Positive feedback counts too — this isn't just for reporting friction.
+
+```bash
+# CLI
+meticulous agent submit-feedback --message="<one or two sentences>" --outcome=<helped|neutral|hindered> --testRunId=<id> --skill=meticulous-review
+
+# MCP
+submit_feedback(message="<one or two sentences>", outcome="<helped|neutral|hindered>", testRunId="<id>", skill="meticulous-review")
+```
+
+## Step 12 -- Hand off what needs fixing
+
+Collect the fix targets: the diffs from Step 7 (including the ones you rejected), the checks you flagged as potential regressions (Step 8), and Agent swarm cases with a fix prompt (Step 9). If there are none, you're done.
+
+- **If you're working on this PR's code** — you implemented the change, or the user asked you to get the PR passing — follow the `meticulous-fix` skill for them now. It reads the comments, fixes the code, replies on each thread, pushes and confirms on the next run.
+- **If you're only reviewing** someone else's PR, don't change their code: the final report (Step 10) already names the fix targets for the PR's author, so you're done.
+- **If the run is of a local build** rather than a pushed commit (as when the `meticulous-test` skill sent you here), stop after the final report: `meticulous-fix` commits, pushes and waits for CI, which isn't how that loop iterates.

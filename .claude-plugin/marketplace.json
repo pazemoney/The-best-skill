@@ -1,0 +1,11 @@
+{
+  "name": "the-best-skill",
+  "owner": { "name": "pazemoney" },
+  "plugins": [
+    {
+      "name": "the-best-skill",
+      "source": "./",
+      "description": "Todas as melhores skills do skills.sh num só lugar."
+    }
+  ]
+}

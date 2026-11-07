@@ -1,0 +1,12 @@
+Repositórios de origem sem arquivo de licença na raiz (veja o repositório original):
+https://github.com/anthropics/skills
+https://github.com/better-auth/skills
+https://github.com/clerk/skills
+https://github.com/degausai/wonda
+https://github.com/firecrawl/cli
+https://github.com/heygen-com/skills-legacy
+https://github.com/nozomio-labs/nia-skill
+https://github.com/remotion-dev/skills
+https://github.com/spillwavesolutions/design-doc-mermaid
+https://github.com/vercel-labs/agent-skills
+https://github.com/wind-alice/alicemarket

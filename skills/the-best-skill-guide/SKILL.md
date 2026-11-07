@@ -1,27 +1,42 @@
 ---
 name: the-best-skill-guide
-description: Guia da coleção The-best-skill. Use quando não souber qual skill usar, quando o usuário pedir "a melhor skill para X", ou para escolher entre várias skills instaladas (design, código, marketing, vídeo, cloud, agentes, escrita).
+description: Guia e catálogo do The-best-skill (mais de 2.000 skills). Use quando não souber qual skill usar, quando pedirem a melhor skill para algo, ou quando a tarefa for de uma área sem skill instalada. Busca no CATALOG.tsv e traz a skill certa sob demanda, sem instalar tudo.
 ---
 
-# Guia da coleção The-best-skill
+# Guia do The-best-skill
 
-Esta coleção reúne centenas de skills. Antes de começar uma tarefa, escolha a skill certa em vez de improvisar.
+O repositório tem **milhares de skills**, mas só um **conjunto essencial** fica instalado (o Claude Code tem limite de espaço para listar descrições). O resto você alcança **sob demanda** por aqui.
 
-## Como escolher
-1. Descubra a área da tarefa (design, código, marketing, vídeo, escrita, cloud, dados, agentes...).
-2. Procure por palavra-chave em `INDEX.md` (na raiz do repositório The-best-skill) ou liste as skills instaladas em `~/.claude/skills`.
-3. Leia o `SKILL.md` da skill escolhida por inteiro antes de aplicar. Siga as instruções dela sem reescrevê-las.
-4. Se duas skills servem, use a de maior número de instalações no `INDEX.md`, salvo se a descrição da outra encaixar melhor.
-5. Se nenhuma servir, use `find-skills` para buscar no skills.sh e `skill-creator` para criar uma nova.
+## Fluxo (siga sempre que a tarefa tocar uma área nova)
+1. **Procure no catálogo** (arquivo `CATALOG.tsv` desta pasta; colunas: skill, categoria, instalações, origem, descrição):
+   ```bash
+   grep -i "scroll\|3d" CATALOG.tsv | sort -t$'\t' -k3 -nr | head -15
+   ```
+2. **Escolha** pela descrição e por instalações (mais instaladas, de origem oficial, têm prioridade).
+3. **Traga a skill**:
+   ```bash
+   bash scripts/get-skill.sh <nome>              # baixa para o cache e mostra o caminho (usa já, sem instalar)
+   bash scripts/get-skill.sh <nome> --install    # além disso instala em ~/.claude/skills (peça permissão antes)
+   ```
+   Para **usar agora**, leia o `SKILL.md` do caminho mostrado e siga as instruções dele (e os arquivos `references/` que ele citar).
+4. **Aplique** a skill como está. **Nunca edite** o conteúdo de uma skill para "melhorá-la"; amplie criando outra skill ao lado.
+5. Skills de terceiros com **scripts**: passe pelo `skill-auditor` antes de rodar qualquer script.
 
-## Atalhos por área
-- Escrever texto que não pareça de IA: `humanizer`
-- Visual de sites e apps: `frontend-design`, `taste-skill`, `ui-ux-pro-max`, `web-design-guidelines`
-- React e Next.js: `react-best-practices`, `composition-patterns`
-- Qualidade de código: `tdd`, `diagnosing-bugs`, `code-review`, `improve-codebase-architecture`
-- Vídeo: `hyperframes`, `remotion-best-practices`, skills `heygen-*`
-- Marketing e vendas: as skills de `coreyhaines31/marketingskills`
-- Criar ou achar skills: `skill-creator`, `find-skills`
-- Menos tokens nas respostas: `caveman`
+## Atalhos (já instalados ou a um comando)
+| Tarefa | Skill |
+|---|---|
+| Site 3D / animação de rolagem sem tremor | `site-3d-scroll`, `gsap-scrolltrigger`, `threejs-fundamentals` |
+| Criar site perfeito (design, SEO, a11y, entrega) | `perfect-website-rules`, `frontend-design`, `design-taste-frontend` |
+| Texto com cara de gente | `humanizer-pt-br` (português), `humanizer` (inglês) |
+| Economizar tokens / limite de uso | `token-economy`, `caveman`, `paleo`, `token-saver-claude-code` |
+| Funil Haiku → Sonnet → Opus | `model-funnel`, `model-routing` |
+| Bugs, testes, revisão, arquitetura | `diagnosing-bugs`, `tdd`, `code-review`, `improve-codebase-architecture` |
+| Achar/criar/auditar skills | `skill-hunter`, `skill-creator`, `skill-auditor`, `find-skills` |
 
-Regra: nunca modifique o conteúdo de uma skill instalada para "melhorá-la". Para ampliar, crie outra skill ao lado.
+## Perfis de instalação (para o usuário)
+`./install.sh --list` mostra os perfis; `./install.sh --profile 3d-e-scroll,economia-de-tokens` adiciona grupos inteiros. Cada grupo soma descrições ao contexto: use poucos por vez e confira com `/context`.
+
+## Regras
+- Nada de instalar sem o usuário saber; nunca sobrescrever skill existente.
+- Skill grande ou de área pouco comum: traga só quando precisar.
+- Se não achar no catálogo, use `skill-hunter` para buscar no skills.sh.

@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Cena 3D com rolagem — modelo</title>
+  <meta name="description" content="Modelo de página com cena 3D conduzida pela rolagem." />
+  <link rel="stylesheet" href="/src/styles.css" />
+</head>
+<body>
+  <a class="skip" href="#depois">Pular a animação</a>
+
+  <header class="intro">
+    <h1>Uma cena que acompanha a sua rolagem</h1>
+    <p>Role para baixo. O objeto 3D é conduzido pelo seu dedo, sem atraso e sem tremor.</p>
+  </header>
+
+  <!-- PALCO: a seção tem altura fixa em CSS; o palco fica sticky na entrada/saída e fixed durante a animação -->
+  <section class="story" id="story" aria-label="Apresentação em 3D">
+    <div class="stage" id="stage">
+      <canvas class="gl" id="gl" aria-hidden="true"></canvas>
+      <img class="still" src="/still.svg" alt="" aria-hidden="true" hidden />
+      <div class="panels">
+        <article class="panel" data-i="0"><h2>Primeiro</h2><p>Texto real no HTML: acessível, copiável e indexável.</p></article>
+        <article class="panel" data-i="1"><h2>Segundo</h2><p>A câmera se aproxima conforme você avança.</p></article>
+        <article class="panel" data-i="2"><h2>Terceiro</h2><p>Tudo reverte quando você sobe a página.</p></article>
+      </div>
+      <div class="meter" aria-hidden="true"><i id="meter"></i></div>
+    </div>
+  </section>
+
+  <main id="depois" class="after">
+    <h2>Depois da cena</h2>
+    <p>O conteúdo segue normalmente. Toda a informação importante também está em texto, fora do canvas.</p>
+  </main>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

@@ -30,7 +30,7 @@ git clone https://github.com/pazemoney/The-best-skill && cd The-best-skill
 ./install.sh --project                                  # só no projeto atual (.claude/skills)
 ./install.sh --library                                  # copia a biblioteca completa (offline)
 ```
-O instalador **nunca sobrescreve** uma skill que você já tem. Também funciona como plugin do Claude Code: `/plugin marketplace add pazemoney/The-best-skill`.
+O instalador **nunca sobrescreve** uma skill que você já tem.
 
 ## Skills originais deste repositório
 

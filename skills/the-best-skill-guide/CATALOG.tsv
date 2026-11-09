@@ -1675,6 +1675,7 @@ x-posting-license	video-e-midia	307	heygen-com/hyperframes-community-skills	Turn
 heygen-cli	video-e-midia	18	heygen-com/heygen-cli	Create AI videos, manage avatars, translate videos, and download results via the HeyGen API. Use when an agent needs to generate videos from
 captions-overlay	video-e-midia	0	heygen-com/hyperframes	Overlay doctrine for captions in HyperFrames videos — the caption MODEL (drop / rail / embed) and the rule that captions are an OVERLAY comp
 changelog-video	video-e-midia	0	heygen-com/hyperframes	Turn a weekly changelog .md into a finished branded changelog video (square 1080, ~45-60s, Annie VO, animated brand background, mock-UI visu
+flow-group-reels	video-e-midia	0	pazemoney/The-best-skill	Reels virais da Flow Group: roteiro, vídeo, voz ElevenLabs, descrição, horário e métricas. Use em qualquer pedido de Reels, vídeo curto, ide
 oversized-cursor	video-e-midia	0	heygen-com/hyperframes	House-style oversized macOS cursor technique for HyperFrames launch videos. Load whenever a scene involves cursors or a pointer-led action, 
 seam-craft	video-e-midia	0	heygen-com/hyperframes	Render-correctness doctrine for scene-to-scene seams in HyperFrames launch videos — the prerequisites that make transitions composite correc
 design-mobile-apps	web-front-end-3d	1276971	designed-by-ai/skills	Design mobile app screens with Sleek, edit Sleek projects, and implement their designs in React Native or HTML.

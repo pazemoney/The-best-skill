@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Reel engine</title>
+<link rel="stylesheet" href="engine/stage.css">
+</head>
+<body>
+<div id="stage"></div>
+<script src="engine/engine.js"></script>
+<script src="engine/components.js"></script>
+<script>
+  // ?p=projects/<pasta-do-video>   (o projeto traz captions.js e project.js)
+  const p = new URLSearchParams(location.search).get('p') || 'projects/reel-01-pizzaria';
+  window.PROJECT_BASE = p.replace(/\/?$/, '/');
+  const load = src => new Promise((ok, fail) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = () => fail(new Error('não carregou ' + src)); document.body.append(s); });
+  (async () => { await load(window.PROJECT_BASE + 'captions.js'); await load(window.PROJECT_BASE + 'project.js'); await REEL.ready(); })()
+    .catch(e => { window.__error = String(e && e.stack || e); console.error(e); });
+  window.addEventListener('error', e => { window.__error = String(e.error && e.error.stack || e.message); });
+</script>
+</body>
+</html>

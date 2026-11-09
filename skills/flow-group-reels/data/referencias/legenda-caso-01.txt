@@ -1,0 +1,36 @@
+# Descrição do Reels de @igao.ia (07/11/2026), transcrita dos prints do usuário para estudo da estrutura. Direitos do autor.
+# Não copiar frases: usar só a lógica (ver references/05-descricao-legenda.md).
+
+👾 Agentes de IA ↓
+
+Imagina uma clínica odontológica recebendo mensagens no WhatsApp durante a madrugada e conseguindo AGENDAR CONSULTAS AUTOMATICAMENTE, MESMO COM O CONSULTÓRIO FECHADO!
+
+É exatamente isso que você pode criar usando um AGENTE DE INTELIGÊNCIA ARTIFICIAL conectado ao WhatsApp e à agenda da clínica!
+
+E o mais interessante: ele pode atender pacientes 24 horas por dia!
+
+🎙️ Transcrição de áudios: recebe mensagens de voz e identifica o que o paciente precisa.
+
+🤖 Atendimento com IA: responde dúvidas frequentes e identifica solicitações de agendamento.
+
+🚨 Identificação de urgência: reconhece relatos que precisam de atenção e orienta o contato com um profissional ou serviço de urgência, sem substituir uma avaliação clínica.
+
+📅 Consulta de horários: verifica a disponibilidade real na agenda da clínica.
+
+✅ Agendamento automático: registra a consulta após a confirmação do paciente.
+
+📍 Informações da clínica: envia endereço, localização e orientações sobre o atendimento.
+
+⏰ Lembretes automáticos: envia mensagens antes das consultas para ajudar a reduzir faltas.
+
+[trecho não capturado nos prints] ... implementação desse tipo de automação para clínicas odontológicas, com projetos de até R$ 3.000, dependendo do escopo.
+
+🔥 E a parte mais interessante: enquanto a equipe está descansando, o agente pode continuar respondendo mensagens e organizando novos agendamentos.
+
+Imagine a dentista acordar e encontrar três novas consultas marcadas durante a madrugada!
+
+Você não está vendendo apenas um chatbot. Está oferecendo uma solução para melhorar o atendimento e evitar a perda de oportunidades!
+
+✅ Comenta "AGENDA" que eu te mando o FLUXO COMPLETO + PASSO A PASSO para criar esse agente de inteligência artificial.
+
+E me segue para receber os melhores PROMPTs, SKILLs e FERRAMENTAS de inteligência artificial todos os dias.

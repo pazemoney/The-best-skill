@@ -1,6 +1,6 @@
 # Índice de skills
 
-Total: **2129** skills. Instalações vêm do ranking do skills.sh (0 = sem dado ou skill própria).
+Total: **2130** skills. Instalações vêm do ranking do skills.sh (0 = sem dado ou skill própria).
 
 Para achar uma skill: procure pelo nome ou assunto nesta página (Ctrl+F) ou use `skills/the-best-skill-guide/CATALOG.tsv`.
 
@@ -602,7 +602,7 @@ Para achar uma skill: procure pelo nome ou assunto nesta página (Ctrl+F) ou use
 | `humanize-korean` | [epoko77-ai/im-not-ai](https://github.com/epoko77-ai/im-not-ai) | 1,005 | AI(ChatGPT·Claude·Gemini 등)가 쓴 한글 텍스트를 "사람이 쓴 글처럼" 윤문해주는 오케스트레이터 스킬. 번역투·영어 인용 과다·기계적 병렬·관용구·피동태 남용·접속사 남발·리듬 균일성·이모지/불릿 과다 등 10대 카테고리 85개 AI 티 패턴을 탐지 |
 | `humanizer-pt-br` | [pazemoney/The-best-skill](https://github.com/pazemoney/The-best-skill) | 458 | Humaniza textos em português do Brasil, tirando a cara de texto de IA (clichês, vocabulário inflado, estrutura repetitiva, tom de robô) sem mudar fato |
 
-## video-e-midia (69)
+## video-e-midia (70)
 
 | Skill | Origem | Instalações | Descrição |
 |---|---|---:|---|
@@ -673,6 +673,7 @@ Para achar uma skill: procure pelo nome ou assunto nesta página (Ctrl+F) ou use
 | `heygen-cli` | [heygen-com/heygen-cli](https://github.com/heygen-com/heygen-cli) | 18 | Create AI videos, manage avatars, translate videos, and download results via the HeyGen API. Use when an agent needs to generate videos from text prom |
 | `captions-overlay` | [heygen-com/hyperframes](https://github.com/heygen-com/hyperframes) | 0 | Overlay doctrine for captions in HyperFrames videos — the caption MODEL (drop / rail / embed) and the rule that captions are an OVERLAY composited on  |
 | `changelog-video` | [heygen-com/hyperframes](https://github.com/heygen-com/hyperframes) | 0 | Turn a weekly changelog .md into a finished branded changelog video (square 1080, ~45-60s, Annie VO, animated brand background, mock-UI visualizations |
+| `flow-group-reels` | [pazemoney/The-best-skill](https://github.com/pazemoney/The-best-skill) | 0 | Reels virais da Flow Group: roteiro, vídeo, voz ElevenLabs, descrição, horário e métricas. Use em qualquer pedido de Reels, vídeo curto, ideia de cont |
 | `oversized-cursor` | [heygen-com/hyperframes](https://github.com/heygen-com/hyperframes) | 0 | House-style oversized macOS cursor technique for HyperFrames launch videos. Load whenever a scene involves cursors or a pointer-led action, when kicki |
 | `seam-craft` | [heygen-com/hyperframes](https://github.com/heygen-com/hyperframes) | 0 | Render-correctness doctrine for scene-to-scene seams in HyperFrames launch videos — the prerequisites that make transitions composite correctly on the |
 

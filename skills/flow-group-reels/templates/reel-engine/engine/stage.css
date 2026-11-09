@@ -1,0 +1,112 @@
+/* Reel engine — identidade Flow Group (monocromática) + componentes de interface. */
+@font-face { font-family: 'Anton'; src: url('fonts/Anton-Regular.woff2') format('woff2'); font-display: block; }
+@font-face { font-family: 'Montserrat'; src: url('fonts/Montserrat-Variable.woff2') format('woff2'); font-weight: 100 900; font-display: block; }
+@font-face { font-family: 'Marker'; src: url('fonts/PermanentMarker-Regular.woff2') format('woff2'); font-display: block; }
+@font-face { font-family: 'InterUI'; src: url('fonts/Inter-Regular.woff2') format('woff2'); font-weight: 400; font-display: block; }
+@font-face { font-family: 'InterUI'; src: url('fonts/Inter-Medium.woff2') format('woff2'); font-weight: 500; font-display: block; }
+@font-face { font-family: 'InterUI'; src: url('fonts/Inter-SemiBold.woff2') format('woff2'); font-weight: 600; font-display: block; }
+@font-face { font-family: 'InterUI'; src: url('fonts/Inter-Bold.woff2') format('woff2'); font-weight: 700; font-display: block; }
+
+:root {
+  --bg: #050506; --bg-2: #0c0c0e;
+  --s1: #111113; --s2: #161618; --s3: #1c1c1f; --s4: #232326; --s5: #2c2c30;
+  --line-1: rgb(255 255 255 / .06); --line-2: rgb(255 255 255 / .10); --line-3: rgb(255 255 255 / .18);
+  --text: #f4f4f2; --text-2: #c4c5c8; --text-3: #9b9ca1; --text-4: #76777c;
+  --paper: #ecebe8; --ink: #121214;
+  --ok: #3ccf7a; --bad: #ff4d5e;
+  --wa-bg: #0b141a; --wa-in: #202c33; --wa-out: #144d37; --wa-green: #25d366; /* só dentro do mockup do WhatsApp */
+  --r-lg: 34px; --r-md: 24px; --r-sm: 16px;
+  --shadow: 0 40px 80px -30px rgb(0 0 0 / .85), 0 0 0 1px var(--line-2);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--bg); }
+body { font-family: 'Montserrat', sans-serif; color: var(--text); -webkit-font-smoothing: antialiased; text-rendering: geometricPrecision; }
+#stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; background: var(--bg); }
+.layer, .scenes, .scene, .tr, .cam { position: absolute; inset: 0; }
+.scene { display: none; perspective: 1600px; }
+.tr { transform-origin: 50% 45%; will-change: transform, filter, opacity; }
+.cam { transform-origin: 50% 42%; }
+
+/* ---------- fundo ---------- */
+.bg { background: radial-gradient(120% 70% at 50% 34%, #17171a 0%, #0b0b0d 45%, #050506 78%); }
+.bg-glow { position: absolute; left: 50%; top: 36%; width: 1400px; height: 1400px; transform: translate(-50%, -50%);
+  background: radial-gradient(closest-side, rgb(255 255 255 / .07), transparent 70%); }
+.bg-floor { position: absolute; left: -40%; right: -40%; bottom: -6%; height: 54%; perspective: 520px; perspective-origin: 50% 0%;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 38%, #000 100%); mask-image: linear-gradient(to bottom, transparent 0%, #000 38%, #000 100%); overflow: hidden; }
+.bg-grid { position: absolute; left: 0; right: 0; top: -120px; height: 200%; transform-origin: 50% 0%;
+  background-image: linear-gradient(to right, rgb(255 255 255 / .085) 1.5px, transparent 1.5px), linear-gradient(to bottom, rgb(255 255 255 / .07) 1.5px, transparent 1.5px);
+  background-size: 120px 120px; transform: rotateX(72deg); }
+.bg-floor > .bg-grid { transform: none; }
+.bg-floor { transform-style: preserve-3d; }
+.bg-floor::before { content: ''; position: absolute; inset: 0; }
+.bokeh { position: absolute; border-radius: 50%; background: radial-gradient(circle, rgb(255 255 255 / .9), rgb(255 255 255 / 0) 70%); }
+.bg-vignette { position: absolute; inset: 0; background: radial-gradient(130% 90% at 50% 45%, transparent 55%, rgb(0 0 0 / .75) 100%); }
+.bg-grain { position: absolute; inset: -50%; opacity: .05;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='256' height='256'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+
+/* ---------- legendas ---------- */
+.captions { left: 70px; right: 70px; bottom: auto; height: 260px; display: block; }
+.cap-line { position: absolute; left: 0; right: 0; top: 0; display: none; flex-wrap: wrap; justify-content: center; align-items: center; column-gap: 16px; row-gap: 6px; }
+.cap-w { font-weight: 600; font-size: 60px; line-height: 1.12; letter-spacing: -.012em; color: #fff; text-shadow: 0 4px 18px rgb(0 0 0 / .65); display: inline-block; }
+.cap-key { --box: 0; position: relative; display: inline-block; padding: 2px 16px 0; margin: 0 2px; }
+.cap-key::before { content: ''; position: absolute; inset: 0; border: 2.5px solid rgb(255 255 255 / .92); background: rgb(255 255 255 / .09);
+  transform: scaleX(calc(.82 + var(--box) * .18)); opacity: var(--box); box-shadow: 0 0 34px rgb(255 255 255 / calc(var(--box) * .16)); }
+.cap-key-txt { position: relative; font-family: 'Anton', sans-serif; font-size: 76px; line-height: 1.04; text-transform: uppercase; letter-spacing: .01em; color: #fff; text-shadow: 0 4px 22px rgb(0 0 0 / .6); }
+.cap-key .hd { position: absolute; width: 13px; height: 13px; background: #fff; border-radius: 2px; opacity: var(--box); box-shadow: 0 0 0 2px #0b0b0d; }
+.cap-key .h-tl { left: -6px; top: -6px; } .cap-key .h-tr { right: -6px; top: -6px; } .cap-key .h-bl { left: -6px; bottom: -6px; } .cap-key .h-br { right: -6px; bottom: -6px; }
+
+/* ---------- assinatura ---------- */
+.handle { left: 60px; right: auto; top: 150px; bottom: auto; display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 28px; letter-spacing: .02em; color: #fff; opacity: 0; }
+.handle-dot { width: 12px; height: 12px; border-radius: 50%; background: #fff; box-shadow: 0 0 14px rgb(255 255 255 / .8); }
+
+/* ---------- componentes ---------- */
+.ui { font-family: 'InterUI', sans-serif; }
+.abs { position: absolute; }
+.center-x { left: 50%; transform: translateX(-50%); }
+.card { position: absolute; background: linear-gradient(180deg, #19191c, #121214); border-radius: var(--r-lg); box-shadow: var(--shadow); overflow: hidden; }
+.card.paper { background: linear-gradient(180deg, #f3f2ee, #e3e1db); color: var(--ink); box-shadow: 0 40px 80px -30px rgb(0 0 0 / .9), inset 0 0 0 1px rgb(0 0 0 / .06); }
+.row { display: flex; align-items: center; }
+.col { display: flex; flex-direction: column; }
+.pill { display: inline-flex; align-items: center; gap: 10px; height: 52px; padding: 0 22px; border-radius: 999px; background: var(--s4); border: 1px solid var(--line-2); font: 600 26px 'InterUI'; color: var(--text); white-space: nowrap; }
+.pill.ok { background: rgb(60 207 122 / .14); border-color: rgb(60 207 122 / .45); color: #c8f5d9; }
+.pill.bad { background: rgb(255 77 94 / .14); border-color: rgb(255 77 94 / .5); color: #ffd0d5; }
+.pill.white { background: #fff; color: #0b0b0d; border-color: #fff; }
+.dot { width: 14px; height: 14px; border-radius: 50%; background: currentColor; flex: none; }
+
+/* iPhone */
+.phone { position: absolute; width: 600px; height: 1230px; border-radius: 92px; background: #0a0a0b; box-shadow: 0 0 0 3px #3a3a3f, 0 0 0 12px #121214, 0 0 0 14px #2a2a2e, 0 60px 120px -30px rgb(0 0 0 / .9); overflow: hidden; }
+.phone .island { position: absolute; top: 26px; left: 50%; width: 190px; height: 56px; margin-left: -95px; border-radius: 40px; background: #000; z-index: 5; }
+.phone .screen { position: absolute; inset: 0; border-radius: 88px; overflow: hidden; }
+.phone .sbar { position: absolute; top: 34px; left: 64px; right: 64px; display: flex; justify-content: space-between; font: 600 30px 'InterUI'; color: #fff; z-index: 4; }
+
+/* WhatsApp (escuro) */
+.wa { position: absolute; inset: 0; background: var(--wa-bg); font-family: 'InterUI'; }
+.wa-head { position: absolute; top: 0; left: 0; right: 0; height: 200px; padding: 110px 34px 0; background: #1f2c34; display: flex; align-items: center; gap: 20px; }
+.wa-av { width: 66px; height: 66px; border-radius: 50%; background: #3b4a54; display: grid; place-items: center; font: 700 30px 'InterUI'; color: #e9edef; flex: none; }
+.wa-name { font: 600 34px 'InterUI'; color: #e9edef; } .wa-sub { font: 400 25px 'InterUI'; color: #8696a0; }
+.wa-body { position: absolute; top: 200px; bottom: 120px; left: 0; right: 0; padding: 28px 26px; display: flex; flex-direction: column; gap: 14px; overflow: hidden; }
+.bub { max-width: 84%; padding: 18px 24px 12px; border-radius: 24px; font: 400 33px/1.3 'InterUI'; color: #e9edef; position: relative; }
+.bub.in { align-self: flex-start; background: var(--wa-in); border-top-left-radius: 6px; }
+.bub.out { align-self: flex-end; background: var(--wa-out); border-top-right-radius: 6px; }
+.bub .meta { display: block; text-align: right; font-size: 20px; color: #8696a0; margin-top: 4px; }
+.bub b { font-weight: 600; }
+.wa-input { position: absolute; left: 20px; right: 20px; bottom: 30px; height: 76px; border-radius: 40px; background: #1f2c34; color: #8696a0; font: 400 28px 'InterUI'; display: flex; align-items: center; padding: 0 30px; }
+.chat-list .chat { display: flex; align-items: center; gap: 22px; padding: 22px 30px; border-bottom: 1px solid rgb(255 255 255 / .05); }
+.chat .nm { font: 600 30px 'InterUI'; color: #e9edef; } .chat .msg { font: 400 25px 'InterUI'; color: #8696a0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px; }
+.chat .tm { font: 500 22px 'InterUI'; color: var(--wa-green); } .chat .badge { min-width: 40px; height: 40px; border-radius: 20px; background: var(--wa-green); color: #0b141a; font: 700 22px 'InterUI'; display: grid; place-items: center; padding: 0 10px; }
+
+/* painéis da Flow (sistemas) */
+.panel { position: absolute; background: linear-gradient(180deg, #18181b, #111113); border-radius: var(--r-lg); box-shadow: var(--shadow); font-family: 'InterUI'; overflow: hidden; }
+.panel-h { display: flex; align-items: center; gap: 18px; padding: 30px 34px; border-bottom: 1px solid var(--line-1); font: 600 30px 'InterUI'; }
+.panel-h .tag { margin-left: auto; font: 600 22px 'InterUI'; color: var(--text-3); letter-spacing: .06em; text-transform: uppercase; }
+.ico { width: 56px; height: 56px; border-radius: 16px; display: grid; place-items: center; background: var(--s5); flex: none; }
+.ico svg { width: 30px; height: 30px; }
+.stat { background: var(--s2); border: 1px solid var(--line-1); border-radius: var(--r-md); padding: 26px 28px; }
+.stat .k { font: 500 24px 'InterUI'; color: var(--text-3); } .stat .v { font: 700 64px 'InterUI'; letter-spacing: -.02em; margin-top: 6px; }
+.big-num { font-family: 'Anton'; letter-spacing: .01em; }
+.stamp { position: absolute; font-family: 'Anton'; font-size: 74px; letter-spacing: .06em; padding: 8px 26px; border: 7px solid currentColor; border-radius: 14px; transform-origin: 50% 50%; }
+.toggle { width: 120px; height: 68px; border-radius: 40px; background: var(--s5); position: relative; flex: none; }
+.toggle .knob { position: absolute; top: 6px; left: 6px; width: 56px; height: 56px; border-radius: 50%; background: #fff; box-shadow: 0 4px 10px rgb(0 0 0 / .5); }
+.mono { font-family: 'InterUI'; font-variant-numeric: tabular-nums; }
+.hand { font-family: 'Marker'; }
+.label-ilustrativo { position: absolute; font: 600 20px 'InterUI'; letter-spacing: .12em; text-transform: uppercase; color: var(--text-4); }

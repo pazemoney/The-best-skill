@@ -1,0 +1,5 @@
+# arquivos gerados (pesados): refaça com make_reel.sh
+projects/*/build/
+projects/*/snaps/
+projects/*/audio/*.wav
+build/

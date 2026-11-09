@@ -27,6 +27,7 @@ O repositório tem **milhares de skills**, mas só um **conjunto essencial** fic
 |---|---|
 | Site 3D / animação de rolagem sem tremor | `site-3d-scroll`, `gsap-scrolltrigger`, `threejs-fundamentals` |
 | Criar site perfeito (design, SEO, a11y, entrega) | `perfect-website-rules`, `frontend-design`, `design-taste-frontend` |
+| Reels / vídeo curto / descrição de post da Flow Group | `flow-group-reels` (roteiro, vídeo, voz, legenda, horário, métricas) |
 | Texto com cara de gente | `humanizer-pt-br` (português), `humanizer` (inglês) |
 | Economizar tokens / limite de uso | `token-economy`, `caveman`, `paleo`, `token-saver-claude-code` |
 | Funil Haiku → Sonnet → Opus | `model-funnel`, `model-routing` |

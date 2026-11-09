@@ -1,6 +1,6 @@
 # The Best Skill
 
-**2129 skills** das mais usadas do mundo ([skills.sh](https://skills.sh)), de todas as áreas, num só repositório. Em vez de baixar uma skill de cada vez, você instala tudo de uma vez e o Claude passa a ter o melhor de cada área.
+**2130 skills** das mais usadas do mundo ([skills.sh](https://skills.sh)), de todas as áreas, num só repositório. Em vez de baixar uma skill de cada vez, você instala tudo de uma vez e o Claude passa a ter o melhor de cada área.
 
 ## Como usar (o jeito fácil)
 
@@ -15,7 +15,7 @@ O Claude lê o [`INSTALL.md`](INSTALL.md) e instala.
 O Claude Code mostra ao modelo o nome e a descrição de cada skill instalada, e há limite de espaço para isso. Com milhares de skills, muitas ficariam invisíveis e o gasto de tokens subiria em toda sessão. Por isso o instalador faz o seguinte:
 
 1. **Instala o conjunto essencial** (~40 skills de maior impacto, em [`profiles/core.list`](profiles/core.list)) e o **guia** `the-best-skill-guide`.
-2. O guia traz um **catálogo** de todas as 2129 skills. Quando uma tarefa precisa de uma skill fora do essencial, o Claude a **busca e traz sob demanda**.
+2. O guia traz um **catálogo** de todas as 2130 skills. Quando uma tarefa precisa de uma skill fora do essencial, o Claude a **busca e traz sob demanda**.
 3. Quem quiser pode adicionar **perfis** por assunto ou instalar **tudo** (`--all`).
 
 ## Instalar na mão
@@ -44,6 +44,7 @@ O instalador **nunca sobrescreve** uma skill que você já tem.
 | `skill-hunter` | Acha skills no skills.sh/GitHub, avalia e instala sem sobrescrever |
 | `skill-auditor` | Auditoria de segurança de skills de terceiros (scanner + checklist) |
 | `the-best-skill-guide` | Catálogo e entrega sob demanda de todas as skills |
+| `flow-group-reels` | **Reels virais da Flow Group**: engenharia reversa de um viral, Fórmula FLOW de roteiro, edição e voz ElevenLabs com números, modelo de descrição, horários a testar, métricas com notas e um motor de vídeo 1080×1920 pronto (com o primeiro Reels como exemplo) |
 
 O modelo 3D de `site-3d-scroll` foi testado em Chromium emulando desktop, Pixel 7 e iPhone 12: **0 px de desvio do palco em cerca de 900 quadros reais**, sem erros de console, sem rolagem lateral, com plano B sem WebGL e com "reduzir animações". Ainda falta conferir em iPhone físico.
 
